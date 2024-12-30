@@ -1,5 +1,7 @@
 package com.multitenant.config;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import lombok.AllArgsConstructor;
 import org.mybatis.spring.annotation.MapperScan;
 import org.slf4j.Logger;
@@ -22,12 +24,12 @@ import java.util.Properties;
 @MapperScan("com.multitenant.repository.mapper")
 @AllArgsConstructor
 public class MultiTenantConfiguration {
-    private final static Logger log = LoggerFactory.getLogger(MultiTenantConfiguration.class);
+    private final static Logger logger = LoggerFactory.getLogger(MultiTenantConfiguration.class);
 
     @Bean
     @ConfigurationProperties(prefix = "tenants")
     public DataSource dataSource() throws IOException {
-        log.info("Setting up multiple tenant data sources");
+        logger.info("Setting up multiple tenant data sources");
 
         Map<Object, Object> resolvedDataSources = new HashMap<>();
 
@@ -37,20 +39,20 @@ public class MultiTenantConfiguration {
         for (Resource resource : resources) {
             Properties tenantProperties = new Properties();
 
-            log.info("Building datasource from file {}", resource.getFilename());
+            logger.info("Building datasource from file {}", resource.getFilename());
             try {
                 tenantProperties.load(resource.getInputStream());
                 String tenantId = tenantProperties.getProperty("name");
 
-                DataSource dataSource = DataSourceBuilder.create()
-                        .url(tenantProperties.getProperty("datasource.url"))
-                        .username(tenantProperties.getProperty("datasource.username"))
-                        .password(tenantProperties.getProperty("datasource.password"))
-                        .driverClassName(tenantProperties.getProperty("datasource.driver-class-name"))
-                        .build();
-                resolvedDataSources.put(tenantId, dataSource);
+                HikariConfig config = new HikariConfig();
+                config.setJdbcUrl(tenantProperties.getProperty("datasource.url"));
+                config.setUsername(tenantProperties.getProperty("datasource.username"));
+                config.setPassword(tenantProperties.getProperty("datasource.password"));
+                config.setDriverClassName(tenantProperties.getProperty("datasource.driver-class-name"));
 
-                log.info("Datasource for tenant {} build", tenantId);
+                resolvedDataSources.put(tenantId, new HikariDataSource(config));
+
+                logger.info("Datasource for tenant {} build", tenantId);
             } catch (IOException e) {
                 throw new RuntimeException("Problem in tenant datasource: " + e.getMessage());
             }

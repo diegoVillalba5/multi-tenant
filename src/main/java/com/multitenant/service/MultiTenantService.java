@@ -38,7 +38,6 @@ public class MultiTenantService {
         return String.format("Current tenant: %s", TenantContext.getCurrentTenant());
     }
 
-
     public List<User> getUsers() {
         return userMapper.getUsers();
     }
