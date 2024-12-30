@@ -34,6 +34,11 @@ public class MultiTenantService {
                 .build();
     }
 
+    public String ping() {
+        return String.format("Current tenant: %s", TenantContext.getCurrentTenant());
+    }
+
+
     public List<User> getUsers() {
         return userMapper.getUsers();
     }

@@ -48,6 +48,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(request -> {
             request.requestMatchers("/error").permitAll();
             request.requestMatchers(HttpMethod.POST,    "/api/v1/auth").permitAll();
+            request.requestMatchers(HttpMethod.GET,     "/api/v1").authenticated();
             request.requestMatchers(HttpMethod.GET,     "/api/v1/user").authenticated();
             request.anyRequest().denyAll();
         });

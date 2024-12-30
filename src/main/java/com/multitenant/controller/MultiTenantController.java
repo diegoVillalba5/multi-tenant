@@ -39,6 +39,16 @@ public class MultiTenantController {
         }
     }
 
+    @GetMapping
+    public ResponseEntity<String> ping() {
+        try {
+            return ResponseEntity.ok(svc.ping());
+        } catch (Exception e) {
+            logger.info(e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @GetMapping("user")
     public ResponseEntity<List<User>> getUsers() {
         try {
